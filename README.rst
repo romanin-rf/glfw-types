@@ -1,4 +1,4 @@
-pyGLFW
+glfwt
 ======
 
 This module provides Python bindings for `GLFW <http://www.glfw.org/>`__
@@ -8,19 +8,19 @@ except for:
 
 -  function names use the pythonic ``words_with_underscores`` notation
    instead of ``camelCase``
--  ``GLFW_`` and ``glfw`` prefixes have been removed, as their function
+-  ``GLFW_`` and ``glfwt`` prefixes have been removed, as their function
    is replaced by the module namespace
-   (you can use ``from glfw.GLFW import *`` if you prefer the naming
+   (you can use ``from glfwt.GLFW import *`` if you prefer the naming
    convention used by the GLFW C API)
 -  structs have been replaced with Python sequences and namedtuples
 -  functions like ``glfwGetMonitors`` return a list instead of a pointer
    and an object count
 -  Gamma ramps use floats between 0.0 and 1.0 instead of unsigned shorts
-   (use ``glfw.NORMALIZE_GAMMA_RAMPS=False`` to disable this)
+   (use ``glfwt.NORMALIZE_GAMMA_RAMPS=False`` to disable this)
 -  GLFW errors are reported as ``glfw.GLFWError`` warnings if no error
    callback is set (use ``glfw.ERROR_REPORTING=False`` to disable this,
    set it to 'warn' instead to issue warnings, set it to 'log' to log it
-   using the 'glfw' logger or set it to a dict to define the behavior for
+   using the 'glfwt' logger or set it to a dict to define the behavior for
    specific error codes)
 -  instead of a sequence for ``GLFWimage`` structs, PIL/pillow ``Image``
    objects can be used
@@ -28,7 +28,7 @@ except for:
 Installation
 ------------
 
-pyGLFW can be installed using pip:
+glfwt can be installed using pip:
 
 .. code:: sh
 
@@ -37,14 +37,14 @@ pyGLFW can be installed using pip:
 Windows
 ~~~~~~~
 
-The GLFW shared library and Visual C++ runtime are included in the Python wheels.
+The glfwt shared library and Visual C++ runtime are included in the Python wheels.
 
 To use a different GLFW library, you can set ``PYGLFW_LIBRARY`` to its location.
 
 macOS
 ~~~~~
 
-The GLFW shared library for 64-bit is included in the Python wheels for macOS.
+The glfwt shared library for 64-bit is included in the Python wheels for macOS.
 
 If you are using a 32-bit Python installation or otherwise cannot use the
 library downloaded with the wheel, you can build and install it yourself by
@@ -58,7 +58,7 @@ the ``PYGLFW_LIBRARY`` environment variable to its path.
 Linux
 ~~~~~
 
-The GLFW shared library is included in the Python wheels for Linux.
+The glfwt shared library is included in the Python wheels for Linux.
 
 If you cannot use these on your system, you can install the GLFW shared
 library using a package management system (e.g. ``apt install libglfw3``
@@ -94,32 +94,32 @@ pyGLFW:
 
 .. code:: python
 
-    import glfw
+    import glfwt
 
     def main():
         # Initialize the library
-        if not glfw.init():
+        if not glfwt.init():
             return
         # Create a windowed mode window and its OpenGL context
-        window = glfw.create_window(640, 480, "Hello World", None, None)
+        window = glfwt.create_window(640, 480, "Hello World", None, None)
         if not window:
-            glfw.terminate()
+            glfwt.terminate()
             return
 
         # Make the window's context current
-        glfw.make_context_current(window)
+        glfwt.make_context_current(window)
 
         # Loop until the user closes the window
-        while not glfw.window_should_close(window):
+        while not glfwt.window_should_close(window):
             # Render here, e.g. using pyOpenGL
 
             # Swap front and back buffers
-            glfw.swap_buffers(window)
+            glfwt.swap_buffers(window)
 
             # Poll for and process events
-            glfw.poll_events()
+            glfwt.poll_events()
 
-        glfw.terminate()
+        glfwt.terminate()
 
     if __name__ == "__main__":
         main()
