@@ -7,11 +7,11 @@ with open(os.path.join(setup_directory, 'README.rst')) as readme_file:
     long_description = readme_file.read()
 
 setup(
-    name='glfw',
-    version='2.5.5',
-    description='A ctypes-based wrapper for GLFW3.',
+    name='glfwt',
+    version='2.6.0',
+    description='A ctypes-based wrapper for GLFW3 (with typing).',
     long_description=long_description,
-    url='https://github.com/FlorianRhiem/pyGLFW',
+    url='https://github.com/romanin-rf/glfwt',
     author='Florian Rhiem',
     author_email='florian.rhiem@gmail.com',
     license='MIT',
@@ -26,10 +26,9 @@ setup(
         'Topic :: Multimedia :: Graphics',
         'Topic :: Scientific/Engineering :: Visualization',
     ],
-    packages=['glfw'],
+    packages=['glfwt'],
     package_data={
-        # include GLFW shared library and Visual C++ runtimes in wheel package
-        'glfw': [
+        'glfwt': [
             'glfw3.dll',
             'libglfw.3.dylib',
             'wayland/libglfw.so',
@@ -38,8 +37,5 @@ setup(
             'msvcr100.dll',
             'msvcr110.dll',
         ]
-    },
-    extras_require={
-        'preview': ['glfw_preview']
     }
 )

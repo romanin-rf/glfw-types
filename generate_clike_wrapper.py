@@ -7,16 +7,16 @@ This file is only needed to be run when adding functions to the wrapper.
 """
 
 from collections import OrderedDict
-import glfw
+import glfwt
 
 constant_names = OrderedDict()
 function_names = OrderedDict()
 constant_type = int
-function_type = type(glfw.init)
-for pythonic_name in sorted(dir(glfw)):
+function_type = type(glfwt.init)
+for pythonic_name in sorted(dir(glfwt)):
     if pythonic_name.startswith('_'):
         continue
-    obj = getattr(glfw, pythonic_name)
+    obj = getattr(glfwt, pythonic_name)
     if isinstance(obj, function_type):
         if pythonic_name == 'get_joystick_guid':
             cstyle_name = 'glfwGetJoystickGUID'

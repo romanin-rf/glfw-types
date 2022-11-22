@@ -2,7 +2,7 @@ pyGLFW
 ======
 
 This module provides Python bindings for `GLFW <http://www.glfw.org/>`__
-(on GitHub: `glfw/glfw <http://github.com/glfw/glfw>`__). It is a
+(on GitHub: `glfw/glfw <http://github.com/glfw/glfw>`__) `with typing`. It is a
 ``ctypes`` wrapper which keeps very close to the original GLFW API,
 except for:
 
@@ -32,7 +32,7 @@ pyGLFW can be installed using pip:
 
 .. code:: sh
 
-    pip install glfw
+    pip install glfwt
 
 Windows
 ~~~~~~~
