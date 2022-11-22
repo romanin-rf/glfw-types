@@ -1419,6 +1419,15 @@ def get_current_context() -> _GLFWwindow:
     """
     ...
 
+def swap_buffers(window: _GLFWwindow) -> None:
+    """
+    Swaps the front and back buffers of the specified window.
+
+    Wrapper for:
+        void glfwSwapBuffers(GLFWwindow* window);
+    """
+    ...
+
 def swap_interval(interval: int) -> None:
     """
     Sets the swap interval for the current context.

@@ -5,7 +5,7 @@ setup_directory = os.path.abspath(os.path.dirname(__file__))
 
 setup(
     name='glfw-types',
-    version='1.0.0',
+    version='1.0.1',
     description='A ctypes-based wrapper for GLFW3 (with typing).',
     url='https://github.com/romanin-rf/glfw-types',
     author='Florian Rhiem',
