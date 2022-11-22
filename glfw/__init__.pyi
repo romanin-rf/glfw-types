@@ -1,13 +1,10 @@
 from __future__ import print_function
 from __future__ import division
 from __future__ import unicode_literals
-
 import collections
+import os
 import ctypes
-import functools
-import sys
 from cffi import FFI
-from .library import glfw as _glfw
 from PIL import Image
 from typing import *
 
@@ -18,28 +15,27 @@ __version__: str
 
 ERROR_REPORTING: Literal['warning', 'exception', 'ignore']='warning'
 NORMALIZE_GAMMA_RAMPS: bool = True
+
+_PREVIEW = os.environ.get('PYGLFW_PREVIEW')
+if _PREVIEW is None:
+    try:
+        import glfw_preview
+        _PREVIEW = True
+    except:
+        _PREVIEW = False
+else:
+    _PREVIEW = bool(_PREVIEW)
+
 _PREVIEW: bool
 ffi: FFI
 _getcwd: Any
-
-try:
-    from cffi import FFI
-except ImportError:
-    _cffi_to_ctypes_void_p = lambda ptr: ptr
-else:
-    ffi = FFI()
-    def _cffi_to_ctypes_void_p(ptr):
-        if isinstance(ptr, ffi.CData):
-            return ctypes.cast(int(ffi.cast('uintptr_t', ptr)), ctypes.c_void_p)
-        return ptr
+_glfw: Any
 
 class GLFWError(UserWarning):
     """
     Exception class used for reporting GLFW errors.
     """
-    def __init__(self, message, error_code=None):
-        super(GLFWError, self).__init__(message)
-        self.error_code = error_code
+    def __init__(self, message: str, error_code: int=None): ...
 
 _callback_repositories: list
 
@@ -50,14 +46,12 @@ class _GLFWwindow(ctypes.Structure):
     """
     _fields_ = [("dummy", ctypes.c_int)]
 
-
 class _GLFWmonitor(ctypes.Structure):
     """
     Wrapper for:
         typedef struct GLFWmonitor GLFWmonitor;
     """
     _fields_ = [("dummy", ctypes.c_int)]
-
 
 class _GLFWvidmode(ctypes.Structure):
     """
@@ -81,31 +75,20 @@ class _GLFWvidmode(ctypes.Structure):
         'red', 'green', 'blue'
     ])
 
-    def __init__(self):
-        ctypes.Structure.__init__(self)
-        self.width = 0
-        self.height = 0
-        self.red_bits = 0
-        self.green_bits = 0
-        self.blue_bits = 0
-        self.refresh_rate = 0
+    def __init__(self) -> None:
+        ...
 
-    def wrap(self, video_mode):
+    def wrap(self, video_mode: ...) -> None:
         """
         Wraps a nested python sequence.
         """
-        size, bits, self.refresh_rate = video_mode
-        self.width, self.height = size
-        self.red_bits, self.green_bits, self.blue_bits = bits
+        ...
 
-    def unwrap(self):
+    def unwrap(self) -> GLFWvidmode:
         """
         Returns a GLFWvidmode object.
         """
-        size = self.Size(self.width, self.height)
-        bits = self.Bits(self.red_bits, self.green_bits, self.blue_bits)
-        return self.GLFWvidmode(size, bits, self.refresh_rate)
-
+        ...
 
 class _GLFWgammaramp(ctypes.Structure):
     """
@@ -121,53 +104,19 @@ class _GLFWgammaramp(ctypes.Structure):
         'red', 'green', 'blue'
     ])
 
-    def __init__(self):
-        ctypes.Structure.__init__(self)
-        self.red = None
-        self.red_array = None
-        self.green = None
-        self.green_array = None
-        self.blue = None
-        self.blue_array = None
-        self.size = 0
+    def __init__(self) -> None: ...
 
-    def wrap(self, gammaramp):
+    def wrap(self, gammaramp: Tuple[Any, Any, Any]) -> None:
         """
         Wraps a nested python sequence.
         """
-        red, green, blue = gammaramp
-        size = min(len(red), len(green), len(blue))
-        array_type = ctypes.c_ushort*size
-        self.size = ctypes.c_uint(size)
-        self.red_array = array_type()
-        self.green_array = array_type()
-        self.blue_array = array_type()
-        if NORMALIZE_GAMMA_RAMPS:
-            red = [value * 65535 for value in red]
-            green = [value * 65535 for value in green]
-            blue = [value * 65535 for value in blue]
-        for i in range(self.size):
-            self.red_array[i] = int(red[i])
-            self.green_array[i] = int(green[i])
-            self.blue_array[i] = int(blue[i])
-        pointer_type = ctypes.POINTER(ctypes.c_ushort)
-        self.red = ctypes.cast(self.red_array, pointer_type)
-        self.green = ctypes.cast(self.green_array, pointer_type)
-        self.blue = ctypes.cast(self.blue_array, pointer_type)
+        ...
 
-    def unwrap(self):
+    def unwrap(self) -> GLFWgammaramp:
         """
         Returns a GLFWgammaramp object.
         """
-        red = [self.red[i] for i in range(self.size)]
-        green = [self.green[i] for i in range(self.size)]
-        blue = [self.blue[i] for i in range(self.size)]
-        if NORMALIZE_GAMMA_RAMPS:
-            red = [value / 65535.0 for value in red]
-            green = [value / 65535.0 for value in green]
-            blue = [value / 65535.0 for value in blue]
-        return self.GLFWgammaramp(red, green, blue)
-
+        ...
 
 class _GLFWcursor(ctypes.Structure):
     """
@@ -175,7 +124,6 @@ class _GLFWcursor(ctypes.Structure):
         typedef struct GLFWcursor GLFWcursor;
     """
     _fields_ = [("dummy", ctypes.c_int)]
-
 
 class _GLFWimage(ctypes.Structure):
     """
@@ -190,43 +138,19 @@ class _GLFWimage(ctypes.Structure):
         'width', 'height', 'pixels'
     ])
 
-    def __init__(self):
-        ctypes.Structure.__init__(self)
-        self.width = 0
-        self.height = 0
-        self.pixels = None
-        self.pixels_array = None
+    def __init__(self) -> None: ...
 
-    def wrap(self, image):
+    def wrap(self, image: ...) -> None:
         """
         Wraps a nested python sequence or PIL/pillow Image.
         """
-        if hasattr(image, 'size') and hasattr(image, 'convert'):
-            # Treat image as PIL/pillow Image object
-            self.width, self.height = image.size
-            array_type = ctypes.c_ubyte * 4 * (self.width * self.height)
-            self.pixels_array = array_type()
-            pixels = image.convert('RGBA').getdata()
-            for i, pixel in enumerate(pixels):
-                self.pixels_array[i] = pixel
-        else:
-            self.width, self.height, pixels = image
-            array_type = ctypes.c_ubyte * 4 * self.width * self.height
-            self.pixels_array = array_type()
-            for i in range(self.height):
-                for j in range(self.width):
-                    for k in range(4):
-                        self.pixels_array[i][j][k] = pixels[i][j][k]
-        pointer_type = ctypes.POINTER(ctypes.c_ubyte)
-        self.pixels = ctypes.cast(self.pixels_array, pointer_type)
+        ...
 
-    def unwrap(self):
+    def unwrap(self) -> GLFWimage:
         """
         Returns a GLFWimage object.
         """
-        pixels = [[[int(c) for c in p] for p in l] for l in self.pixels_array]
-        return self.GLFWimage(self.width, self.height, pixels)
-
+        ...
 
 class _GLFWgamepadstate(ctypes.Structure):
     """
@@ -240,28 +164,19 @@ class _GLFWgamepadstate(ctypes.Structure):
         'buttons', 'axes'
     ])
 
-    def __init__(self):
-        ctypes.Structure.__init__(self)
-        self.buttons = (ctypes.c_ubyte * 15)(* [0] * 15)
-        self.axes = (ctypes.c_float * 6)(* [0] * 6)
+    def __init__(self) -> None: ...
 
-    def wrap(self, gamepad_state):
+    def wrap(self, gamepad_state: Tuple[ctypes.c_ubyte, ctypes.c_float]) -> None:
         """
         Wraps a nested python sequence.
         """
-        buttons, axes = gamepad_state
-        for i in range(15):
-            self.buttons[i] = buttons[i]
-        for i in range(6):
-            self.axes[i] = axes[i]
+        ...
 
-    def unwrap(self):
+    def unwrap(self) -> ...:
         """
         Returns a GLFWvidmode object.
         """
-        buttons = [int(button) for button in self.buttons]
-        axes = [float(axis) for axis in self.axes]
-        return self.GLFWgamepadstate(buttons, axes)
+        ...
 
 VERSION_MAJOR = 3
 VERSION_MINOR = 3
@@ -556,7 +471,6 @@ COCOA_CHDIR_RESOURCES = 0x00051001
 COCOA_MENUBAR = 0x00051002
 DONT_CARE = -1
 
-
 if _PREVIEW:
     ANGLE_PLATFORM_TYPE = 0x00050002
     ANGLE_PLATFORM_TYPE_NONE = 0x00037001
@@ -597,22 +511,7 @@ if _PREVIEW:
 
 _exc_info_from_callback = None
 
-def _callback_exception_decorator(func):
-    @functools.wraps(func)
-    def callback_wrapper(*args, **kwargs):
-        global _exc_info_from_callback
-        if _exc_info_from_callback is not None:
-            # We are on the way back to Python after an exception was raised.
-            # Do not call further callbacks and wait for the errcheck function
-            # to handle the exception first.
-            return
-        try:
-            return func(*args, **kwargs)
-        except (KeyboardInterrupt, SystemExit):
-            raise
-        except:
-            _exc_info_from_callback = sys.exc_info()
-    return callback_wrapper
+def _callback_exception_decorator(func): ...
 
 def _prepare_errcheck():
     """
@@ -622,25 +521,7 @@ def _prepare_errcheck():
     It also modifies all callback types to automatically wrap the function
     using the _callback_exception_decorator.
     """
-    def errcheck(result, *args):
-        global _exc_info_from_callback
-        if _exc_info_from_callback is not None:
-            exc = _exc_info_from_callback
-            _exc_info_from_callback = None
-            _reraise(exc[1], exc[2])
-        return result
-
-    for symbol in dir(_glfw):
-        if symbol.startswith('glfw'):
-            getattr(_glfw, symbol).errcheck = errcheck
-
-    _globals = globals()
-    for symbol in _globals:
-        if symbol.startswith('_GLFW') and symbol.endswith('fun'):
-            def wrapper_cfunctype(func, cfunctype=_globals[symbol]):
-                return cfunctype(_callback_exception_decorator(func))
-            _globals[symbol] = wrapper_cfunctype
-
+    ...
 
 _GLFWerrorfun = ctypes.CFUNCTYPE(
     None, ctypes.c_int, ctypes.c_char_p
@@ -790,9 +671,6 @@ def _handle_glfw_errors(error_code: int, description: str) -> None:
     'ignore' to disable this behavior.
     """
     ...
-
-_default_error_callback = _GLFWerrorfun(_handle_glfw_errors)
-_error_callback = (_handle_glfw_errors, _default_error_callback)
 
 def set_error_callback(cbfun: _GLFWerrorfun) -> _GLFWerrorfun:
     """
@@ -962,7 +840,7 @@ if hasattr(_glfw, 'glfwWindowHintString'):
         Wrapper for:
             void glfwWindowHintString(int hint, const char* value);
         """
-        _glfw.glfwWindowHintString(hint, _to_char_p(value))
+        ...
 
 def create_window(width: int, height: int, title: str, monitor: _GLFWmonitor, share: _GLFWwindow) -> _GLFWwindow:
     """
@@ -1003,7 +881,7 @@ def set_window_title(window: _GLFWwindow, title: str) -> None:
     Wrapper for:
         void glfwSetWindowTitle(GLFWwindow* window, const char* title);
     """
-    _glfw.glfwSetWindowTitle(window, _to_char_p(title))
+    ...
 
 def get_window_pos(window: _GLFWwindow) -> Tuple[int, int]:
     """
@@ -1443,7 +1321,7 @@ if hasattr(_glfw, 'glfwGetJoystickGUID'):
         Wrapper for:
             const char* glfwGetJoystickGUID(int jid);
         """
-        return _glfw.glfwGetJoystickGUID(joystick_id)
+        ...
 
 if hasattr(_glfw, 'glfwSetJoystickUserPointer') and hasattr(_glfw, 'glfwGetJoystickUserPointer'):
     def set_joystick_user_pointer(joystick_id: int, pointer: Union[ctypes.c_void_p, Any]) -> None:
@@ -1757,12 +1635,6 @@ if hasattr(_glfw, 'glfwGetInstanceProcAddress'):
         ...
 
 if hasattr(_glfw, 'glfwSetWindowIcon'):
-    _glfw.glfwSetWindowIcon.restype = None
-    _glfw.glfwSetWindowIcon.argtypes = [ctypes.POINTER(_GLFWwindow),
-                                        ctypes.c_int,
-                                        ctypes.POINTER(_GLFWimage)]
-
-
     def set_window_icon(
         window: _GLFWwindow,
         count: int,
@@ -2142,8 +2014,6 @@ if _PREVIEW:
             ...
 
     if hasattr(_glfw, 'glfwPlatformSupported'):
-        _glfw.glfwPlatformSupported.restype = ctypes.c_int
-        _glfw.glfwPlatformSupported.argtypes = [ctypes.c_int]
         def platform_supported(platform: int) -> int:
             """
             Returns whether the library includes support for the specified platform.
