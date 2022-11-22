@@ -8,7 +8,7 @@ with open(os.path.join(setup_directory, 'README.rst')) as readme_file:
 
 setup(
     name='glfwt',
-    version='2.6.0',
+    version='2.6.1',
     description='A ctypes-based wrapper for GLFW3 (with typing).',
     long_description=long_description,
     url='https://github.com/romanin-rf/glfwt',
@@ -29,6 +29,7 @@ setup(
     packages=['glfwt'],
     package_data={
         'glfwt': [
+            '__init__.pyi',
             'glfw3.dll',
             'libglfw.3.dylib',
             'wayland/libglfw.so',
